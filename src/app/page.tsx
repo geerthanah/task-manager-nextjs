@@ -1,126 +1,308 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Task } from "@/types/task";
-import { loadTasks, saveTasks } from "@/utils/storage";
-import TaskItem from "@/components/TaskItem";
 import { v4 as uuidv4 } from "uuid";
+
+type Priority = "Low" | "Medium" | "High";
+type StatusFilter = "All" | "Completed" | "Pending";
+
+interface Task {
+  id: string;
+  title: string;
+  completed: boolean;
+  priority: Priority;
+  dueDate: string; // ISO date string
+}
+
+const priorityOrder: Priority[] = ["High", "Medium", "Low"];
 
 export default function HomePage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState("");
+  const [priority, setPriority] = useState<Priority>("Medium");
+  const [dueDate, setDueDate] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
+  const [filter, setFilter] = useState<StatusFilter>("All");
+  const [sortByPriority, setSortByPriority] = useState(false);
+  const [sortByDueDate, setSortByDueDate] = useState(false);
   const [error, setError] = useState("");
 
+  // Load tasks & dark mode from localStorage on mount
   useEffect(() => {
-    setTasks(loadTasks());
+    if (typeof window !== "undefined") {
+      const savedTasks = localStorage.getItem("tasks");
+      if (savedTasks) setTasks(JSON.parse(savedTasks));
+      const savedTheme = localStorage.getItem("darkMode");
+      if (savedTheme === "true") setDarkMode(true);
+    }
   }, []);
 
+  // Save tasks & dark mode changes to localStorage
   useEffect(() => {
-    saveTasks(tasks);
-  }, [tasks]);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      localStorage.setItem("darkMode", darkMode.toString());
+    }
+  }, [tasks, darkMode]);
+
+  // Toggle dark mode class on html
+  useEffect(() => {
+    if (darkMode) document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
+  }, [darkMode]);
 
   const addTask = () => {
-    if (title.trim() === "") {
+    if (!title.trim()) {
       setError("Task title cannot be empty");
+      return;
+    }
+    if (!dueDate) {
+      setError("Please select a due date");
       return;
     }
     setError("");
     const newTask: Task = {
       id: uuidv4(),
-      title,
+      title: title.trim(),
       completed: false,
+      priority,
+      dueDate,
     };
     setTasks([...tasks, newTask]);
     setTitle("");
+    setPriority("Medium");
+    setDueDate("");
   };
 
   const toggleTask = (id: string) => {
-    setTasks(tasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
+    setTasks(tasks.map(t => (t.id === id ? { ...t, completed: !t.completed } : t)));
   };
 
   const deleteTask = (id: string) => {
-    setTasks(tasks.filter((t) => t.id !== id));
+    setTasks(tasks.filter(t => t.id !== id));
   };
 
+  // Filter tasks by status
+  const filteredTasks = tasks.filter(task => {
+    if (filter === "All") return true;
+    if (filter === "Completed") return task.completed;
+    return !task.completed;
+  });
+
+  // Sort filtered tasks
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    if (sortByPriority) {
+      // Priority descending (High first)
+      const prioDiff = priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
+      if (prioDiff !== 0) return prioDiff;
+    }
+    if (sortByDueDate) {
+      // Due date ascending (soonest first)
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    }
+    return 0;
+  });
+
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4 text-blue-700">Add New Task</h2>
-      <div className="flex gap-3 mb-6">
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter task title..."
-          className="flex-grow border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    <div className="max-w-5xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg min-h-screen flex flex-col">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-extrabold text-blue-700 dark:text-blue-400">
+          Super Task Manager
+        </h1>
         <button
-          onClick={addTask}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition"
+          onClick={() => setDarkMode(!darkMode)}
+          className="px-5 py-2 border border-gray-400 dark:border-gray-600 rounded-md text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
         >
-          Add Task
+          {darkMode ? "Light Mode" : "Dark Mode"}
         </button>
       </div>
-      {error && <p className="text-red-600 mb-4">{error}</p>}
 
-      <h3 className="text-lg font-semibold mb-3">Tasks</h3>
-      {tasks.length === 0 ? (
-        <p className="text-gray-500 italic">No tasks yet. Add some above!</p>
-      ) : (
-        <table className="w-full border-collapse table-auto">
-          <thead>
-            <tr className="bg-blue-100 text-left">
-              <th className="p-3 border border-gray-300">#</th>
-              <th className="p-3 border border-gray-300">Task</th>
-              <th className="p-3 border border-gray-300">Status</th>
-              <th className="p-3 border border-gray-300">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tasks.map((task, i) => (
-              <tr
-                key={task.id}
-                className={`${
-                  i % 2 === 0 ? "bg-white" : "bg-gray-50"
-                } hover:bg-blue-50 transition`}
-              >
-                <td className="p-3 border border-gray-300">{i + 1}</td>
-                <td
-                  className={`p-3 border border-gray-300 ${
-                    task.completed ? "line-through text-gray-400" : ""
-                  }`}
-                >
-                  {task.title}
-                </td>
-                <td className="p-3 border border-gray-300">
-                  {task.completed ? (
-                    <span className="text-green-600 font-semibold">Completed</span>
-                  ) : (
-                    <span className="text-yellow-600 font-semibold">Pending</span>
-                  )}
-                </td>
-                <td className="p-3 border border-gray-300 flex gap-2">
-                  <button
-                    onClick={() => toggleTask(task.id)}
-                    className="text-blue-600 hover:text-blue-800 font-semibold"
-                    aria-label="Toggle completion"
-                    title="Toggle completion"
-                  >
-                    {task.completed ? "↺ Undo" : "✓ Done"}
-                  </button>
-                  <button
-                    onClick={() => deleteTask(task.id)}
-                    className="text-red-600 hover:text-red-800 font-semibold"
-                    aria-label="Delete task"
-                    title="Delete task"
-                  >
-                    ✗ Delete
-                  </button>
-                </td>
+      {/* Add Task Form */}
+      <section className="mb-12 bg-gray-50 dark:bg-gray-800 p-8 rounded-md shadow-md max-w-xl mx-auto">
+  <h2 className="text-2xl font-semibold mb-6 text-gray-700 dark:text-gray-300">
+    Add New Task
+  </h2>
+  <form
+    onSubmit={(e) => {
+      e.preventDefault();
+      addTask();
+    }}
+    className="flex flex-col gap-6"
+  >
+    <input
+      type="text"
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      placeholder="Task Title"
+      className="w-full p-4 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      style={{ minHeight: "56px" }}
+      required
+    />
+    <select
+      value={priority}
+      onChange={(e) => setPriority(e.target.value as Priority)}
+      className="w-full p-4 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 text-lg"
+      style={{ minHeight: "56px" }}
+    >
+      <option value="High">🔥 High Priority</option>
+      <option value="Medium">⚡ Medium Priority</option>
+      <option value="Low">🌿 Low Priority</option>
+    </select>
+    <input
+      type="date"
+      value={dueDate}
+      onChange={(e) => setDueDate(e.target.value)}
+      className="w-full p-4 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 text-lg"
+      min={new Date().toISOString().split("T")[0]}
+      style={{ minHeight: "56px" }}
+      required
+    />
+    <button
+      type="submit"
+      className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md py-4 text-lg font-semibold transition"
+    >
+      Add Task
+    </button>
+    {error && <p className="text-red-600 mt-2">{error}</p>}
+  </form>
+</section>
+
+
+
+      {/* Filters & Sorting */}
+      <section className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex gap-4 items-center text-gray-700 dark:text-gray-300">
+          <span>Filter:</span>
+          {(["All", "Completed", "Pending"] as StatusFilter[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded-md font-semibold ${
+                filter === f
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-500 hover:text-white"
+              } transition`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-4 items-center text-gray-700 dark:text-gray-300">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={sortByPriority}
+              onChange={(e) => setSortByPriority(e.target.checked)}
+              className="cursor-pointer"
+            />
+            Sort by Priority
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={sortByDueDate}
+              onChange={(e) => setSortByDueDate(e.target.checked)}
+              className="cursor-pointer"
+            />
+            Sort by Due Date
+          </label>
+        </div>
+      </section>
+
+      {/* Task Table */}
+      <section className="overflow-x-auto flex-grow">
+        {sortedTasks.length === 0 ? (
+          <p className="text-center text-gray-500 dark:text-gray-400 italic">
+            No tasks found. Add some tasks!
+          </p>
+        ) : (
+          <table className="w-full border-collapse table-auto text-gray-900 dark:text-gray-200">
+            <thead>
+              <tr className="bg-blue-100 dark:bg-blue-900 text-left">
+                <th className="p-3 border border-gray-300 dark:border-gray-700">#</th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">Title</th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">Priority</th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">Due Date</th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">Status</th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {sortedTasks.map((task, i) => {
+                const isOverdue = !task.completed && new Date(task.dueDate) < new Date();
+                return (
+                  <tr
+                    key={task.id}
+                    className={`${
+                      i % 2 === 0 ? "bg-white dark:bg-gray-700" : "bg-gray-50 dark:bg-gray-800"
+                    } hover:bg-blue-50 dark:hover:bg-blue-800 transition`}
+                  >
+                    <td className="p-3 border border-gray-300 dark:border-gray-700">{i + 1}</td>
+                    <td
+                      className={`p-3 border border-gray-300 dark:border-gray-700 ${
+                        task.completed ? "line-through text-gray-400 dark:text-gray-500" : ""
+                      }`}
+                    >
+                      {task.title}
+                    </td>
+                    <td className="p-3 border border-gray-300 dark:border-gray-700 font-semibold">
+                      <span
+                        className={
+                          task.priority === "High"
+                            ? "text-red-600 dark:text-red-400"
+                            : task.priority === "Medium"
+                            ? "text-yellow-600 dark:text-yellow-400"
+                            : "text-green-600 dark:text-green-400"
+                        }
+                      >
+                        {task.priority}
+                      </span>
+                    </td>
+                    <td
+                      className={`p-3 border border-gray-300 dark:border-gray-700 ${
+                        isOverdue ? "text-red-600 dark:text-red-400 font-bold" : ""
+                      }`}
+                    >
+                      {new Date(task.dueDate).toLocaleDateString()}
+                      {isOverdue ? " (Overdue)" : ""}
+                    </td>
+                    <td className="p-3 border border-gray-300 dark:border-gray-700">
+                      {task.completed ? (
+                        <span className="text-green-600 dark:text-green-400 font-semibold">
+                          Completed
+                        </span>
+                      ) : (
+                        <span className="text-yellow-600 dark:text-yellow-400 font-semibold">
+                          Pending
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3 border border-gray-300 dark:border-gray-700 flex gap-3">
+                      <button
+                        onClick={() => toggleTask(task.id)}
+                        className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                        aria-label="Toggle completion"
+                        title="Toggle completion"
+                      >
+                        {task.completed ? "↺ Undo" : "✓ Done"}
+                      </button>
+                      <button
+                        onClick={() => deleteTask(task.id)}
+                        className="text-red-600 dark:text-red-400 hover:underline font-semibold"
+                        aria-label="Delete task"
+                        title="Delete task"
+                      >
+                        ✗ Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </section>
     </div>
   );
 }
