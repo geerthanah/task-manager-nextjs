@@ -24,6 +24,7 @@ export default function Home() {
             Save and see your changes instantly.
           </li>
         </ol>
+        
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
@@ -73,6 +74,8 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
+          <h1 className="text-3xl font-bold text-red-600">Hello Tailwind!</h1>
+
           <Image
             aria-hidden
             src="/window.svg"
