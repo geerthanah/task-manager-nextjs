@@ -75,15 +75,17 @@ export default function HomePage() {
   };
 
   const toggleTask = (id: string) => {
-    setTasks(tasks.map(t => (t.id === id ? { ...t, completed: !t.completed } : t)));
+    setTasks(
+      tasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
+    );
   };
 
   const deleteTask = (id: string) => {
-    setTasks(tasks.filter(t => t.id !== id));
+    setTasks(tasks.filter((t) => t.id !== id));
   };
 
   // Filter tasks by status
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = tasks.filter((task) => {
     if (filter === "All") return true;
     if (filter === "Completed") return task.completed;
     return !task.completed;
@@ -93,7 +95,8 @@ export default function HomePage() {
   const sortedTasks = [...filteredTasks].sort((a, b) => {
     if (sortByPriority) {
       // Priority descending (High first)
-      const prioDiff = priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
+      const prioDiff =
+        priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
       if (prioDiff !== 0) return prioDiff;
     }
     if (sortByDueDate) {
@@ -110,17 +113,12 @@ export default function HomePage() {
         <h1 className="text-3xl font-extrabold text-blue-700 dark:text-blue-400">
           Super Task Manager
         </h1>
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="px-5 py-2 border border-gray-400 dark:border-gray-600 rounded-md text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-        >
-          {darkMode ? "Light Mode" : "Dark Mode"}
-        </button>
+      
       </div>
 
       {/* Add Task Form */}
-      <section className="mb-12 bg-gray-50 dark:bg-gray-800 p-8 rounded-md shadow-md max-w-xl mx-auto">
-  <h2 className="text-2xl font-semibold mb-6 text-gray-700 dark:text-gray-300">
+      <section className="max-w-4xl mx-auto mt-20 p-16 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-300 dark:border-gray-700">
+  <h2 className="text-5xl font-extrabold mb-12 text-center text-gray-900 dark:text-gray-100">
     Add New Task
   </h2>
   <form
@@ -128,47 +126,75 @@ export default function HomePage() {
       e.preventDefault();
       addTask();
     }}
-    className="flex flex-col gap-6"
+    className="space-y-10"
   >
-    <input
-      type="text"
-      value={title}
-      onChange={(e) => setTitle(e.target.value)}
-      placeholder="Task Title"
-      className="w-full p-4 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      style={{ minHeight: "56px" }}
-      required
-    />
-    <select
-      value={priority}
-      onChange={(e) => setPriority(e.target.value as Priority)}
-      className="w-full p-4 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 text-lg"
-      style={{ minHeight: "56px" }}
-    >
-      <option value="High">🔥 High Priority</option>
-      <option value="Medium">⚡ Medium Priority</option>
-      <option value="Low">🌿 Low Priority</option>
-    </select>
-    <input
-      type="date"
-      value={dueDate}
-      onChange={(e) => setDueDate(e.target.value)}
-      className="w-full p-4 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 text-lg"
-      min={new Date().toISOString().split("T")[0]}
-      style={{ minHeight: "56px" }}
-      required
-    />
+    <div>
+      <label
+        htmlFor="title"
+        className="block mb-4 text-xl font-semibold text-gray-800 dark:text-gray-300"
+      >
+        Task Title
+      </label>
+      <input
+        id="title"
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Enter task title"
+        className="w-full rounded-xl border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 text-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500 transition"
+        required
+      />
+    </div>
+
+    <div>
+      <label
+        htmlFor="priority"
+        className="block mb-4 text-xl font-semibold text-gray-800 dark:text-gray-300"
+      >
+        Priority
+      </label>
+      <select
+        id="priority"
+        value={priority}
+        onChange={(e) => setPriority(e.target.value)}
+        className="w-full rounded-xl border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 text-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500 transition"
+      >
+        <option value="High">🔥 High Priority</option>
+        <option value="Medium">⚡ Medium Priority</option>
+        <option value="Low">🌿 Low Priority</option>
+      </select>
+    </div>
+
+    <div>
+      <label
+        htmlFor="dueDate"
+        className="block mb-4 text-xl font-semibold text-gray-800 dark:text-gray-300"
+      >
+        Due Date
+      </label>
+      <input
+        id="dueDate"
+        type="date"
+        value={dueDate}
+        onChange={(e) => setDueDate(e.target.value)}
+        min={new Date().toISOString().split("T")[0]}
+        className="w-full rounded-xl border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 text-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500 transition"
+        required
+      />
+    </div>
+
     <button
       type="submit"
-      className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md py-4 text-lg font-semibold transition"
+      className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-extrabold py-6 rounded-2xl shadow-xl text-3xl transition"
     >
       Add Task
     </button>
-    {error && <p className="text-red-600 mt-2">{error}</p>}
+
+    {error && (
+      <p className="text-center text-red-700 font-semibold mt-6 text-xl">{error}</p>
+    )}
   </form>
 </section>
-
-
 
       {/* Filters & Sorting */}
       <section className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -220,28 +246,47 @@ export default function HomePage() {
           <table className="w-full border-collapse table-auto text-gray-900 dark:text-gray-200">
             <thead>
               <tr className="bg-blue-100 dark:bg-blue-900 text-left">
-                <th className="p-3 border border-gray-300 dark:border-gray-700">#</th>
-                <th className="p-3 border border-gray-300 dark:border-gray-700">Title</th>
-                <th className="p-3 border border-gray-300 dark:border-gray-700">Priority</th>
-                <th className="p-3 border border-gray-300 dark:border-gray-700">Due Date</th>
-                <th className="p-3 border border-gray-300 dark:border-gray-700">Status</th>
-                <th className="p-3 border border-gray-300 dark:border-gray-700">Actions</th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">
+                  #
+                </th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">
+                  Title
+                </th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">
+                  Priority
+                </th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">
+                  Due Date
+                </th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">
+                  Status
+                </th>
+                <th className="p-3 border border-gray-300 dark:border-gray-700">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {sortedTasks.map((task, i) => {
-                const isOverdue = !task.completed && new Date(task.dueDate) < new Date();
+                const isOverdue =
+                  !task.completed && new Date(task.dueDate) < new Date();
                 return (
                   <tr
                     key={task.id}
                     className={`${
-                      i % 2 === 0 ? "bg-white dark:bg-gray-700" : "bg-gray-50 dark:bg-gray-800"
+                      i % 2 === 0
+                        ? "bg-white dark:bg-gray-700"
+                        : "bg-gray-50 dark:bg-gray-800"
                     } hover:bg-blue-50 dark:hover:bg-blue-800 transition`}
                   >
-                    <td className="p-3 border border-gray-300 dark:border-gray-700">{i + 1}</td>
+                    <td className="p-3 border border-gray-300 dark:border-gray-700">
+                      {i + 1}
+                    </td>
                     <td
                       className={`p-3 border border-gray-300 dark:border-gray-700 ${
-                        task.completed ? "line-through text-gray-400 dark:text-gray-500" : ""
+                        task.completed
+                          ? "line-through text-gray-400 dark:text-gray-500"
+                          : ""
                       }`}
                     >
                       {task.title}
@@ -261,7 +306,9 @@ export default function HomePage() {
                     </td>
                     <td
                       className={`p-3 border border-gray-300 dark:border-gray-700 ${
-                        isOverdue ? "text-red-600 dark:text-red-400 font-bold" : ""
+                        isOverdue
+                          ? "text-red-600 dark:text-red-400 font-bold"
+                          : ""
                       }`}
                     >
                       {new Date(task.dueDate).toLocaleDateString()}
