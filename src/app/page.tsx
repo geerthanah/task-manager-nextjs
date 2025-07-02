@@ -117,84 +117,97 @@ export default function HomePage() {
       </div>
 
       {/* Add Task Form */}
-      <section className="max-w-4xl mx-auto mt-20 p-16 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-300 dark:border-gray-700">
-  <h2 className="text-5xl font-extrabold mb-12 text-center text-gray-900 dark:text-gray-100">
-    Add New Task
+      <section className="max-w-7xl mx-auto mt-24 px-6 py-20 bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-300 dark:border-gray-700">
+  <h2 className="text-6xl font-bold mb-16 text-center text-gray-900 dark:text-gray-100">
+    📝 Add New Task
   </h2>
-  <form
-    onSubmit={(e) => {
-      e.preventDefault();
-      addTask();
-    }}
-    className="space-y-10"
-  >
-    <div>
-      <label
-        htmlFor="title"
-        className="block mb-4 text-xl font-semibold text-gray-800 dark:text-gray-300"
-      >
-        Task Title
-      </label>
-      <input
-        id="title"
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Enter task title"
-        className="w-full rounded-xl border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 text-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500 transition"
-        required
-      />
-    </div>
 
-    <div>
-      <label
-        htmlFor="priority"
-        className="block mb-4 text-xl font-semibold text-gray-800 dark:text-gray-300"
-      >
-        Priority
-      </label>
-      <select
-        id="priority"
-        value={priority}
-        onChange={(e) => setPriority(e.target.value)}
-        className="w-full rounded-xl border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 text-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500 transition"
-      >
-        <option value="High">🔥 High Priority</option>
-        <option value="Medium">⚡ Medium Priority</option>
-        <option value="Low">🌿 Low Priority</option>
-      </select>
-    </div>
-
-    <div>
-      <label
-        htmlFor="dueDate"
-        className="block mb-4 text-xl font-semibold text-gray-800 dark:text-gray-300"
-      >
-        Due Date
-      </label>
-      <input
-        id="dueDate"
-        type="date"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
-        min={new Date().toISOString().split("T")[0]}
-        className="w-full rounded-xl border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 text-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500 transition"
-        required
-      />
-    </div>
-
-    <button
-      type="submit"
-      className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-extrabold py-6 rounded-2xl shadow-xl text-3xl transition"
+  <div className="max-w-7xl mx-auto">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        addTask();
+      }}
+      className="space-y-12"
     >
-      Add Task
-    </button>
+      {/* Task Title */}
+      <div>
+        <label
+          htmlFor="title"
+          className="block mb-4 text-2xl font-semibold text-gray-800 dark:text-gray-300"
+        >
+          📌 Task Title
+        </label>
+        <input
+          id="title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter task title"
+          className="w-full rounded-2xl border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 text-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500 transition"
+          required
+        />
+      </div>
 
-    {error && (
-      <p className="text-center text-red-700 font-semibold mt-6 text-xl">{error}</p>
-    )}
-  </form>
+      {/* Priority */}
+      <div>
+        <label
+          htmlFor="priority"
+          className="block mb-4 text-2xl font-semibold text-gray-800 dark:text-gray-300"
+        >
+          ⚠️ Priority
+        </label>
+        <select
+          id="priority"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as Priority)}
+          className="w-full rounded-2xl border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 text-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500 transition"
+        >
+          <option value="High">🔥 High Priority</option>
+          <option value="Medium">⚡ Medium Priority</option>
+          <option value="Low">🌿 Low Priority</option>
+        </select>
+      </div>
+
+      {/* Due Date */}
+      <div>
+        <label
+          htmlFor="dueDate"
+          className="block mb-4 text-2xl font-semibold text-gray-800 dark:text-gray-300"
+        >
+          📅 Due Date
+        </label>
+        <input
+          id="dueDate"
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          min={new Date().toISOString().split("T")[0]}
+          className="w-full rounded-2xl border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 text-2xl shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500 transition"
+          required
+        />
+      </div>
+
+      {/* Submit Button */}
+      <div>
+        <button
+          type="submit"
+          className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-extrabold py-6 rounded-2xl shadow-xl text-3xl transition"
+        >
+          ➕ Add Task
+        </button>
+
+        {error && (
+          <p className="text-center text-red-600 font-semibold mt-6 text-xl">
+            {error}
+          </p>
+        )}
+      </div>
+    </form>
+  </div>
 </section>
+
+
 
       {/* Filters & Sorting */}
       <section className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
